@@ -2,12 +2,7 @@ name: Deploy Worker
 
 on:
   workflow_dispatch:
-  workflow_run:
-    # We run this workflow after the configuration is updated to avoid conflicts
-    # while updating the manifest.json file
-    workflows: ["Update Configuration and Build"]
-    types:
-      - completed
+  push:
 
 env:
   APP_ID: ${{ secrets.APP_ID }}

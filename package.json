@@ -4,7 +4,7 @@
   "description": "Handles email redirects through Cloudflare.",
   "author": "Ubiquity DAO",
   "license": "MIT",
-  "main": "src/worker.ts",
+  "main": "src/index.ts",
   "type": "module",
   "engines": {
     "node": ">=20.10.0"

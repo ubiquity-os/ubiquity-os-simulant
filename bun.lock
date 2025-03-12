@@ -9,7 +9,6 @@
         "@ubiquity-os/plugin-sdk": "^3.0.0",
         "@ubiquity-os/ubiquity-os-logger": "^1.4.0",
         "dotenv": "16.4.7",
-        "hono": "^4.6.19",
         "ts-node": "^10.9.2",
       },
       "devDependencies": {

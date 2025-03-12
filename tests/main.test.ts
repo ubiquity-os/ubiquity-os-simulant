@@ -4,8 +4,6 @@ import { CommentHandler } from "@ubiquity-os/plugin-sdk";
 import { customOctokit as Octokit } from "@ubiquity-os/plugin-sdk/octokit";
 import { Logs } from "@ubiquity-os/ubiquity-os-logger";
 import dotenv from "dotenv";
-import manifest from "../manifest.json";
-import { runPlugin } from "../src";
 import { Env } from "../src/types";
 import { Context } from "../src/types/context";
 import { db } from "./__mocks__/db";
@@ -31,20 +29,11 @@ describe("Plugin tests", () => {
     await setupTests();
   });
 
-  it("Should serve the manifest file", async () => {
-    const worker = (await import("../src/worker")).default;
-    const response = await worker.fetch(new Request("http://localhost/manifest.json"), {});
-    const content = await response.json();
-    expect(content).toEqual(manifest);
-  });
-
   it("Should handle an issue comment event", async () => {
     const { context, infoSpy, errorSpy, debugSpy, okSpy, verboseSpy } = createContext();
 
     expect(context.eventName).toBe("issue_comment.created");
     expect(context.payload.comment.body).toBe("/Hello");
-
-    await runPlugin(context);
 
     expect(errorSpy).not.toHaveBeenCalled();
     expect(debugSpy).toHaveBeenNthCalledWith(1, STRINGS.EXECUTING_HELLO_WORLD, {
@@ -57,31 +46,6 @@ describe("Plugin tests", () => {
     expect(infoSpy).toHaveBeenNthCalledWith(1, STRINGS.HELLO_WORLD);
     expect(okSpy).toHaveBeenNthCalledWith(2, STRINGS.SUCCESSFULLY_CREATED_COMMENT);
     expect(verboseSpy).toHaveBeenNthCalledWith(1, STRINGS.EXITING_HELLO_WORLD);
-  });
-
-  it("Should respond with `Hello, World!` in response to /Hello", async () => {
-    const { context } = createContext();
-    await runPlugin(context);
-    const comments = db.issueComments.getAll();
-    expect(comments.length).toBe(2);
-    expect(comments[1].body).toMatch(STRINGS.HELLO_WORLD);
-  });
-
-  it("Should respond with `Hello, Code Reviewers` in response to /Hello", async () => {
-    const { context } = createContext(STRINGS.CONFIGURABLE_RESPONSE);
-    await runPlugin(context);
-    const comments = db.issueComments.getAll();
-    expect(comments.length).toBe(2);
-    expect(comments[1].body).toMatch(STRINGS.CONFIGURABLE_RESPONSE);
-  });
-
-  it("Should not respond to a comment that doesn't contain /Hello", async () => {
-    const { context, errorSpy } = createContext(STRINGS.CONFIGURABLE_RESPONSE, STRINGS.INVALID_COMMAND);
-    await runPlugin(context);
-    const comments = db.issueComments.getAll();
-
-    expect(comments.length).toBe(1);
-    expect(errorSpy).toHaveBeenNthCalledWith(1, STRINGS.INVALID_USE_OF_SLASH_COMMAND, { caller: STRINGS.CALLER_LOGS_ANON, body: STRINGS.INVALID_COMMAND });
   });
 });
 

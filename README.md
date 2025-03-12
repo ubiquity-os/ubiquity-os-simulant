@@ -1,9 +1,8 @@
-# `@ubiquity-os/plugin-template`
+# `@ubiquity-os/ubiquity-os-simulant`
 
 ## Prerequisites
 
-- A good understanding of how the [kernel](https://github.com/ubiquity/ubiquibot-kernel) works and how to interact with it.
-- A basic understanding of the Ubiquibot configuration and how to define your plugin's settings.
+- a CloudFlare account with a domain name to handle email redirects on given domains
 
 ## Getting Started
 
@@ -36,8 +35,6 @@ plugins:
 ```
 
 ###### At this stage, your plugin will fire on your defined events with the required settings passed in from the kernel. You can now start writing your plugin's logic.
-
-6. Start building your plugin by adding your logic to the [plugin.ts](./src/index.ts) file.
 
 ## Testing a plugin
 

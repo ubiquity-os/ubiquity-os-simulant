@@ -29,19 +29,6 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
-      - name: Update wrangler.toml Name Field
-        run: |
-          branch_name=$(echo '${{ github.event.workflow_run.head_branch || github.ref }}' | sed 's#refs/heads/##' | sed 's#[^a-zA-Z0-9]#-#g')
-          # Extract base name from wrangler.toml
-          base_name=$(grep '^name = ' wrangler.toml | head -n 1 | sed 's/^name = "\(.*\)"$/\1/')
-          # Concatenate branch name with base name
-          new_name="${base_name}-${branch_name}"
-          # Truncate the new name to 63 characters for RFC 1035
-          new_name=$(echo "$new_name" | cut -c 1-63)
-          # Update the wrangler.toml file
-          sed -i '0,/^name = .*/{s/^name = .*/name = "'"$new_name"'"/}' wrangler.toml
-          echo "Updated wrangler.toml name to: $new_name"
-
       - name: Deploy with Wrangler
         id: wrangler_deploy
         uses: cloudflare/wrangler-action@v3
@@ -50,56 +37,12 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           secrets: |
-            SUPABASE_URL
-            SUPABASE_KEY
             CLOUDFLARE_ACCOUNT_ID            
             ${{ secrets.KERNEL_PUBLIC_KEY && secrets.KERNEL_PUBLIC_KEY != '' && 'KERNEL_PUBLIC_KEY' || '' }}
 
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           KERNEL_PUBLIC_KEY: ${{ secrets.KERNEL_PUBLIC_KEY }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Update manifest.json worker url
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-
-            const manifestPath = path.resolve("${{ github.workspace }}", './manifest.json');
-            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-
-            manifest["homepage_url"] = "${{ steps.wrangler_deploy.outputs.deployment-url }}";
-
-            const updatedManifest = JSON.stringify(manifest, null, 2);
-            fs.writeFileSync(manifestPath, updatedManifest);
-            console.log('Updated manifest:', updatedManifest);
-
-      - name: Get GitHub App token
-        if: env.APP_ID != '' && env.APP_PRIVATE_KEY != ''
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ env.APP_ID }}
-          private-key: ${{ env.APP_PRIVATE_KEY }}
-
-      - name: Format manifest using Prettier
-        shell: bash
-        run: |
-          bun add -DE prettier
-          bun prettier --write .
-
-      - name: Commit file
-        uses: swinton/commit@v2.x
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
-        with:
-          files: |
-            manifest.json
-          commit-message: "chore: [skip ci] update manifest.json url"
-          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
       - name: Write Deployment URL to Summary
         run: |

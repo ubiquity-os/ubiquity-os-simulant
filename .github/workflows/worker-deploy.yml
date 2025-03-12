@@ -31,6 +31,10 @@ jobs:
           wranglerVersion: "3.114.1"
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          secrets: |
+            USER_GITHUB_TOKEN
+        env:
+          USER_GITHUB_TOKEN: ${{ secrets.USER_GITHUB_TOKEN }}
 
       - name: Write Deployment URL to Summary
         run: |
